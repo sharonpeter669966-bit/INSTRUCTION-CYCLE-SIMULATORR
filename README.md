@@ -8,14 +8,14 @@
 
 <br>
 
-[![Live Demo](https://img.shields.io/badge/▶_LIVE_SIMULATOR-Click_to_Launch-ff9800?style=for-the-badge)](https://sharonpeter669966-bit.github.io/instruction-cycle-simulator/)
+[![Live Demo](https://img.shields.io/badge/▶_LIVE_SIMULATOR-Click_to_Launch-ff9800?style=for-the-badge)](https://sharonpeter669966-bit.github.io/INSTRUCTION-CYCLE-SIMULATORR/)
 
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
 ![No Dependencies](https://img.shields.io/badge/Dependencies-None-2f9e44?style=flat-square)
 
-### 🔗 **[https://sharonpeter669966-bit.github.io/instruction-cycle-simulator/](https://sharonpeter669966-bit.github.io/instruction-cycle-simulator/)**
+### 🔗 **[https://sharonpeter669966-bit.github.io/INSTRUCTION-CYCLE-SIMULATORR/](https://sharonpeter669966-bit.github.io/INSTRUCTION-CYCLE-SIMULATORR/)**
 
 </div>
 
@@ -84,12 +84,12 @@ Every instruction in this simulator passes through **all five stages**, with no 
 ## 🚀 Quick Start
 
 ### Option 1: Just click
-Open the **[live simulator](https://sharonpeter669966-bit.github.io/instruction-cycle-simulator/)**. Nothing to install.
+Open the **[live simulator](https://sharonpeter669966-bit.github.io/INSTRUCTION-CYCLE-SIMULATORR/)**. Nothing to install.
 
 ### Option 2: Run it locally
 ```bash
-git clone https://github.com/sharonpeter669966-bit/instruction-cycle-simulator.git
-cd instruction-cycle-simulator
+git clone https://github.com/sharonpeter669966-bit/INSTRUCTION-CYCLE-SIMULATORR.git
+cd INSTRUCTION-CYCLE-SIMULATORR
 ```
 Then open `index.html` in your browser (or use the **Live Server** extension in VS Code).
 
@@ -121,7 +121,7 @@ Want a loop? Pick **"Countdown loop (JZ / JUMP)"** from the example dropdown.
 ## 🗂️ Project Structure
 
 ```
-instruction-cycle-simulator/
+INSTRUCTION-CYCLE-SIMULATORR/
 ├── index.html   → page layout, panels and datapath diagram
 ├── style.css    → colourful poster-inspired design & glow animations
 ├── script.js    → assembler, CPU model and the 5-stage engine
