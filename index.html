@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instruction Cycle Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Poppins:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header class="hero">
+    <div class="hero-text">
+      <h1>INSTRUCTION CYCLE <span>SIMULATOR</span></h1>
+      <p class="tagline">Visualize • Understand • Master</p>
+    </div>
+    <div class="hero-side">
+      <p class="hand">From Instruction<br />to Execution<br />— Step by Step!</p>
+      <div class="chips">
+        <span class="chip c-fetch">Fetch</span>
+        <span class="chip c-decode">Decode</span>
+        <span class="chip c-exec">Execute</span>
+        <span class="chip c-mem">Memory Access</span>
+        <span class="chip c-wb">Write Back</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ================= CONTROL PANEL ================= -->
+    <section class="card panel" id="controlPanel">
+      <h2 class="title t-purple"><span class="ico">⚙️</span> Simulator Controls</h2>
+      <div class="control-grid">
+        <div class="editor-box">
+          <label for="program">Assembly Program <small>(one instruction per line, <code>;</code> for comments, labels like <code>loop:</code> allowed)</small></label>
+          <textarea id="program" spellcheck="false"></textarea>
+          <div class="row">
+            <select id="examples" title="Load an example program">
+              <option value="basic">Example: ADD R1, R2, R3 (basic)</option>
+              <option value="memory">Example: LOAD / STORE</option>
+              <option value="logic">Example: AND / OR / SUB</option>
+              <option value="loop">Example: Countdown loop (JZ / JUMP)</option>
+            </select>
+            <button id="btnLoad" class="btn b-blue">📥 Load Program</button>
+          </div>
+          <p id="asmStatus" class="status"></p>
+        </div>
+
+        <div class="btn-box">
+          <button id="btnStage" class="btn b-green">▶ Step Stage</button>
+          <button id="btnInstr" class="btn b-orange">⏭ Step Instruction</button>
+          <button id="btnRun" class="btn b-purple">⏩ Run</button>
+          <button id="btnPause" class="btn b-yellow" disabled>⏸ Pause</button>
+          <button id="btnReset" class="btn b-red">↺ Reset</button>
+          <div class="speed">
+            <label for="speed">Speed: <b id="speedVal">600 ms</b></label>
+            <input type="range" id="speed" min="100" max="1500" step="50" value="600" />
+          </div>
+          <div class="next-box">Next stage: <b id="nextStage">Fetch</b></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= STAGE TRACKER ================= -->
+    <section class="card panel">
+      <h2 class="title t-blue"><span class="ico">🧭</span> How It Works — all 5 stages run for every instruction</h2>
+      <div class="stages" id="stages">
+        <div class="stage s1" data-stage="0">
+          <div class="num">1</div><h3>Fetch</h3>
+          <p>Get the instruction from memory using the PC.</p>
+          <code>IR ← Memory[PC]</code>
+        </div>
+        <div class="arrow">➜</div>
+        <div class="stage s2" data-stage="1">
+          <div class="num">2</div><h3>Decode</h3>
+          <p>Identify the opcode and operands.</p>
+          <code>CU ← opcode</code>
+        </div>
+        <div class="arrow">➜</div>
+        <div class="stage s3" data-stage="2">
+          <div class="num">3</div><h3>Execute</h3>
+          <p>Perform the operation using the ALU.</p>
+          <code>ALU ← op(a, b)</code>
+        </div>
+        <div class="arrow">➜</div>
+        <div class="stage s4" data-stage="3">
+          <div class="num">4</div><h3>Memory Access</h3>
+          <p>Read from or write to data memory.</p>
+          <code>Mem[addr] ↔ reg</code>
+        </div>
+        <div class="arrow">➜</div>
+        <div class="stage s5" data-stage="4">
+          <div class="num">5</div><h3>Write Back</h3>
+          <p>Store the result in a register and update PC.</p>
+          <code>Rd ← result, PC ← next</code>
+        </div>
+      </div>
+      <div class="explain" id="explain">Load a program and press <b>Step Stage</b> to begin the instruction cycle.</div>
+    </section>
+
+    <!-- ================= SYSTEM ARCHITECTURE ================= -->
+    <section class="card panel">
+      <h2 class="title t-pink"><span class="ico">🧩</span> System Architecture (live datapath)</h2>
+      <div class="arch">
+        <div class="blk pm" id="b-pm">
+          <h4>Program Memory</h4>
+          <div class="mini" id="pmMini">—</div>
+        </div>
+        <div class="link" id="l-pm">➜</div>
+
+        <div class="blk ir" id="b-ir">
+          <h4>Instruction Register (IR)</h4>
+          <div class="val" id="irVal">—</div>
+        </div>
+        <div class="link" id="l-ir">➜</div>
+
+        <div class="cpu">
+          <div class="cpu-label">CPU</div>
+          <div class="cpu-inner">
+            <div class="blk cu" id="b-cu">
+              <h4>Control Unit (CU)</h4>
+              <div class="mini" id="cuMini">idle</div>
+            </div>
+            <div class="vlink">⇅</div>
+            <div class="blk alu" id="b-alu">
+              <h4>ALU</h4>
+              <div class="mini" id="aluMini">idle</div>
+            </div>
+            <div class="blk regs" id="b-regs">
+              <h4>Registers (R0 – R3)</h4>
+              <div class="mini" id="regMini">R0=0 R1=0 R2=0 R3=0</div>
+            </div>
+            <div class="blk pc" id="b-pc">
+              <h4>Program Counter (PC)</h4>
+              <div class="val" id="pcVal">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="link" id="l-dm">➜</div>
+        <div class="blk dm" id="b-dm">
+          <h4>Data Memory</h4>
+          <div class="mini" id="dmMini">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CPU STATE ================= -->
+    <section class="two-col">
+      <div class="card panel">
+        <h2 class="title t-green"><span class="ico">🗃️</span> Registers &amp; Flags</h2>
+        <div class="reg-grid" id="regGrid"></div>
+        <div class="flags">
+          <div class="flag" id="flagZ"><span>Zero (Z)</span><b>0</b></div>
+          <div class="flag" id="flagC"><span>Carry (C)</span><b>0</b></div>
+          <div class="flag" id="flagS"><span>Sign (S)</span><b>0</b></div>
+        </div>
+        <div class="stats">
+          <div>Cycle stages run: <b id="statCycles">0</b></div>
+          <div>Instructions completed: <b id="statInstr">0</b></div>
+          <div>CPU state: <b id="statState">Ready</b></div>
+        </div>
+      </div>
+
+      <div class="card panel">
+        <h2 class="title t-yellow"><span class="ico">📚</span> Current Instruction</h2>
+        <table class="info-table">
+          <tr><th>Instruction</th><td id="ciText">—</td></tr>
+          <tr><th>Opcode</th><td id="ciOp">—</td></tr>
+          <tr><th>Operands</th><td id="ciOperands">—</td></tr>
+          <tr><th>Control signals</th><td id="ciSignals">—</td></tr>
+          <tr><th>ALU operation</th><td id="ciAlu">—</td></tr>
+          <tr><th>ALU result</th><td id="ciResult">—</td></tr>
+          <tr><th>Memory access</th><td id="ciMem">—</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= MEMORIES ================= -->
+    <section class="two-col">
+      <div class="card panel">
+        <h2 class="title t-blue"><span class="ico">📜</span> Program Memory</h2>
+        <div class="mem-list" id="progMem"></div>
+      </div>
+      <div class="card panel">
+        <h2 class="title t-purple"><span class="ico">💾</span> Data Memory (16 cells)</h2>
+        <div class="mem-grid" id="dataMem"></div>
+      </div>
+    </section>
+
+    <!-- ================= EXECUTION TABLE + LOG ================= -->
+    <section class="two-col">
+      <div class="card panel">
+        <h2 class="title t-purple"><span class="ico">&lt;/&gt;</span> Example Trace</h2>
+        <p class="small">Consider the instruction: <b id="traceInstr">ADD R1, R2, R3</b></p>
+        <table class="trace">
+          <thead><tr><th>Step</th><th>Action</th><th>Result</th></tr></thead>
+          <tbody id="traceBody">
+            <tr><td>1. Fetch</td><td>IR ← Memory[PC]</td><td>—</td></tr>
+            <tr><td>2. Decode</td><td>Identify opcode and registers</td><td>—</td></tr>
+            <tr><td>3. Execute</td><td>ALU operation</td><td>—</td></tr>
+            <tr><td>4. Memory Access</td><td>Read / write data memory</td><td>—</td></tr>
+            <tr><td>5. Write Back</td><td>Rd ← result, PC ← next</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card panel">
+        <h2 class="title t-green"><span class="ico">📝</span> Execution Log</h2>
+        <div class="log" id="log"></div>
+        <button id="btnClearLog" class="btn b-gray small-btn">Clear log</button>
+      </div>
+    </section>
+
+    <!-- ================= THEORY ================= -->
+    <section class="two-col">
+      <div class="card panel soft-yellow">
+        <h2 class="title t-yellow"><span class="ico">💡</span> What is an Instruction Cycle?</h2>
+        <p>The instruction cycle is the sequence of steps a CPU follows to execute an instruction. It involves fetching the instruction from memory, understanding it, performing the required operation and updating the CPU state.</p>
+        <p class="note">This project uses a simplified CPU model to visualize the instruction cycle in action. All five stages — including Memory Access and Write Back — are always performed.</p>
+      </div>
+
+      <div class="card panel soft-purple">
+        <h2 class="title t-purple"><span class="ico">🔑</span> Key Concepts</h2>
+        <ul class="keys">
+          <li><b>Instruction</b> – A command given to the CPU.</li>
+          <li><b>Program Counter (PC)</b> – Holds the address of the next instruction.</li>
+          <li><b>Instruction Register (IR)</b> – Stores the current instruction.</li>
+          <li><b>Registers</b> – Small, fast storage locations (R0, R1, R2, R3).</li>
+          <li><b>ALU</b> – Performs arithmetic and logical operations.</li>
+          <li><b>Memory</b> – Stores instructions and data.</li>
+          <li><b>Control Unit (CU)</b> – Decodes and controls the execution.</li>
+          <li><b>Status Flags</b> – Indicate results (Zero, Carry, Sign).</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="two-col">
+      <div class="card panel soft-green">
+        <h2 class="title t-green"><span class="ico">⭐</span> Features</h2>
+        <ul class="ticks">
+          <li>Step-by-step and continuous execution (run, pause, reset)</li>
+          <li>Visual display of PC, IR, registers and memory</li>
+          <li>Supports MOV, ADD, SUB, AND, OR, LOAD, STORE, JUMP, HALT (+ JZ)</li>
+          <li>Shows current instruction and ALU operation</li>
+          <li>Simple and user-friendly interface</li>
+          <li>Helps understand the flow of the instruction cycle</li>
+        </ul>
+      </div>
+      <div class="card panel soft-pink">
+        <h2 class="title t-pink"><span class="ico">🎯</span> Why It's Useful</h2>
+        <ul class="ticks pink">
+          <li>Helps beginners understand how a CPU works.</li>
+          <li>Bridges the gap between theory and real execution.</li>
+          <li>Visual and interactive learning experience.</li>
+          <li>Useful for college projects and presentations.</li>
+          <li>Builds a foundation for pipelining, caching and processor design.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================= INSTRUCTION SET ================= -->
+    <section class="card panel">
+      <h2 class="title t-blue"><span class="ico">📖</span> Instruction Set Reference</h2>
+      <div class="table-wrap">
+        <table class="trace isa">
+          <thead><tr><th>Instruction</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>MOV R1, 5</code> / <code>MOV R1, R2</code></td><td>Load an immediate value / copy a register</td></tr>
+            <tr><td><code>ADD R1, R2, R3</code></td><td>R1 ← R2 + R3</td></tr>
+            <tr><td><code>SUB R1, R2, R3</code></td><td>R1 ← R2 − R3</td></tr>
+            <tr><td><code>AND R1, R2, R3</code></td><td>R1 ← R2 AND R3</td></tr>
+            <tr><td><code>OR R1, R2, R3</code></td><td>R1 ← R2 OR R3</td></tr>
+            <tr><td><code>LOAD R1, [4]</code></td><td>R1 ← DataMemory[4]</td></tr>
+            <tr><td><code>STORE R1, [4]</code></td><td>DataMemory[4] ← R1</td></tr>
+            <tr><td><code>JUMP label</code> / <code>JUMP 2</code></td><td>PC ← target instruction</td></tr>
+            <tr><td><code>JZ label</code></td><td>Jump only if the Zero flag = 1 (bonus)</td></tr>
+            <tr><td><code>HALT</code></td><td>Stop the CPU</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small">Registers are 8-bit (0 – 255). Data memory addresses are 0 – 15.</p>
+    </section>
+  </main>
+
+  <footer>
+    <span class="hand">Small Steps ➜ Big Understanding ➜ Better Future</span>
+    <span>Computer Organisation and Architecture</span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
